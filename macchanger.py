@@ -1,23 +1,20 @@
-import subprocess
+import scapy.all as scapy
 import optparse
-#interface ="eth0"
-#mac_adress="00:1E:45:22:77:65"
 
-parse_object=optparse.OptionParser()
-parse_object.add_option("-i","--interface",dest="interface",help="interface to change!")
-parse_object.add_option("-m","--mac",dest="mac_adress",help="new mac adress")
+def get_user_input():
+    parse_object = optparse.OptionParser()
+    parse_object.add_option("-i", "--ipaddress", dest="ip_address", help="Enter IP address")
+    (user_input, arguments) = parse_object.parse_args()
+    if not user_input.ip_address:
+        print("Enter IP Address")
+    return user_input    
 
-(user_inputs,arguments)=parse_object.parse_args()
+def scan_my_network(ip):
+    arp_request_pack = scapy.ARP(pdst=ip, psrc="your_source_ip_address")
+    broadcast_pack = scapy.Ether(dst="ff:ff:ff:ff:ff:ff")
+    combined_packet = broadcast_pack/arp_request_pack
+    answered_list, unanswered_list = scapy.srp(combined_packet, timeout=1)
+    answered_list.summary()
 
-user_interface=user_inputs.interface
-user_macadress=user_inputs.mac_adress
-print(user_inputs.interface)
-print(user_inputs.mac_adress)
-
-print(parse_object.parse_args())
-print("Mac changer started")
-subprocess.call(["ipconfig",user_interface,"down"])
-subprocess.call(["ipconfig",user_interface,"hw","ether",user_macadress])
-subprocess.call(["ipconfig",user_interface,"up"])
- 
-
+user_input = get_user_input()
+scan_my_network(user_input.ip_address)
